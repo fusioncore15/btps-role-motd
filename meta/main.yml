@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Pierrick Boulière (pbouliere@alteo.fr)
+  company: Alixans
+
+  min_ansible_version: 2.4
+
+  platforms:
+    - name: Debian
+      versions:
+        - 9
+
+  galaxy_tags: []
+
+dependencies: []

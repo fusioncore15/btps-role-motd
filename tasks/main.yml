@@ -1,0 +1,5 @@
+---
+- name: configure
+  import_tasks: configure.yml
+  tags:
+    - action:configure

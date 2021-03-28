@@ -1,0 +1,59 @@
+#!/bin/sh
+
+[ -r /etc/lsb-release ] && . /etc/lsb-release
+
+if [ -z "$DISTRIB_DESCRIPTION" ] && [ -x /usr/bin/lsb_release ]; then
+        # Fall back to using the very slow lsb_release utility
+        DISTRIB_DESCRIPTION=$(lsb_release -s -d)
+fi
+
+RED="\033[00;31m"    # RED
+GRN="\033[00;32m"    # GREEN
+RESET="\033[0m"
+
+printf "Welcome to %s (%s).\n" "$DISTRIB_DESCRIPTION" "$(uname -rv | awk '{print $1 " " $2}')"
+HOST=`hostname`
+HOSTNAME=`cat /etc/hosts | grep "$HOST" | awk '{print $2}'`
+WEBH=`echo $HOSTNAME | grep web-hebergement.net | wc -l`
+
+if [ $WEBH -eq 1 ]
+then
+        echo "$GRN"
+        echo "Hostname : "$HOSTNAME
+        echo $RESET
+else
+        echo "$RED"
+        echo "Hostname : "$HOSTNAME
+        echo $RESET
+fi
+
+# if [ -e /root/file ]
+# then
+#	echo "$RED"========================================================"
+#	echo "=              Serveur bloque pour impaye              ="
+#	echo "========================================================"
+#	echo $RESET
+# fi
+
+current_date=`date`
+load=`cat /proc/loadavg | awk '{print $1}'`
+root_usage=`df -h / | awk '/\// {print $(NF-1)}'`
+var_usage=`df -h /var | awk '/\/var/ {print $(NF-1)}'`
+memory_usage=`free -m | awk '/Mem:/ { total=$2 } /buffers\/cache/ { used=$3 } END { printf("%3.1f%%", used/total*100)}'`
+swap_usage=`free -m | awk '/Swap/ { printf("%3.1f%%", "exit !$2;$3/$2*100") }'`
+users=`users | sed ':a;N;$!ba;s/\n/ /g'`
+uptime=`uptime | grep -ohe 'up .*' | sed 's/,/\ hours/g' | awk '{ printf $2" "$3 }'`
+processes=`ps aux | wc -l`
+ip=`ip -o -4 addr show | awk -F '[ /]+' '/global/' | awk '{print $4}'`
+
+echo "Date : $current_date"
+printf "System load:\t%s\tIP Address:\t%s\n" $load $ip
+printf "Memory usage:\t%s\tSystem uptime:\t%s\n" $memory_usage "$uptime"
+printf "Usage on /:\t%s\tSwap usage:\t%s\n" $root_usage $swap_usage
+printf "Usage on /var:\t%s\tProcesses:\t%s\n" $var_usage $processes
+printf "Connected Users:\t%s\t" "$users"
+echo
+
+[ -f /etc/motd.tail ] && cat /etc/motd.tail || true
+
+printf "\n"

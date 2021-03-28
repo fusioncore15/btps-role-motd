@@ -1,0 +1,26 @@
+---
+- name: create directory /etc/update-motd.d
+  file:
+    path: /etc/update-motd.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: copy motd script to remote server
+  copy:
+    src: "{{ role_path }}/files/etc/update-motd.d/00-alteo"
+    dest: /etc/update-motd.d/00-alteo
+    owner: root
+    group: root
+    mode: 0755
+
+- name: create a symlink from /run/motd.dynamic to /etc/motd
+  file:
+    path: /etc/motd
+    src: /run/motd.dynamic
+    state: link
+    force: yes
+    owner: root
+    group: root
+    mode: 0755
